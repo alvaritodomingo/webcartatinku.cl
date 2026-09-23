@@ -5,9 +5,6 @@ import { motion } from "framer-motion";
 import { Download, Loader2, FileText } from "lucide-react";
 import { cartaPages, formatCLP } from "@/lib/menu-data";
 
-/* ─────────────────────────────────────────────────────────────
-   Colores de sección
-   ───────────────────────────────────────────────────────────── */
 const COLOR: Record<string, string> = {
   terracota: "#c4622d",
   teal:      "#3d7a72",
@@ -16,29 +13,35 @@ const COLOR: Record<string, string> = {
 };
 
 /* ─────────────────────────────────────────────────────────────
-   Genera el HTML de impresión con el logo incrustado como
-   data-URI para que funcione en cualquier origen (blob, S3…)
+   Genera el HTML completo con fondos forzados en impresión
    ───────────────────────────────────────────────────────────── */
 async function buildPrintHTML(): Promise<string> {
-  /* ── Obtener logo como data-URI ─────────────────────────── */
+  /* ── Logo como data-URI ─────────────────────────────────── */
   let logoDataURI = "";
   try {
     const res  = await fetch("/logo-tinku.svg");
     const text = await res.text();
     logoDataURI = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(text)}`;
   } catch {
-    /* fallback: círculo vacío */
     logoDataURI = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
-      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="none" stroke="#c8a96e" stroke-width="2"/><text x="50" y="56" text-anchor="middle" font-size="18" fill="#c8a96e" font-family="serif">T</text></svg>`
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="48" fill="none" stroke="#c8a96e" stroke-width="2"/>
+        <text x="50" y="58" text-anchor="middle" font-size="22" fill="#c8a96e" font-family="serif">T</text>
+      </svg>`
     )}`;
   }
 
-  /* ── Patrón andino SVG inline ───────────────────────────── */
-  const andeanSVG = `data:image/svg+xml,${encodeURIComponent(
-    `<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><rect width='40' height='40' fill='none'/><path d='M0 20h10v-10h10v10h10v-10h10' stroke='%23c8a96e' stroke-width='0.4' fill='none' opacity='0.18'/><path d='M0 30h5v-5h5v5h5v-5h5v5h5v-5h5v5h5v-5h5' stroke='%23c8a96e' stroke-width='0.3' fill='none' opacity='0.12'/></svg>`
+  /* ── Patrón andino como data-URI ────────────────────────── */
+  const andeanPattern = `data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'>
+      <rect width='40' height='40' fill='#f5edd8'/>
+      <path d='M0 20h10v-10h10v10h10v-10h10' stroke='%23c8a96e' stroke-width='0.5' fill='none' opacity='0.25'/>
+      <path d='M0 30h5v-5h5v5h5v-5h5v5h5v-5h5v5h5v-5h5' stroke='%23c8a96e' stroke-width='0.4' fill='none' opacity='0.18'/>
+      <path d='M0 10h5v5h5v-5h5v5h5v-5h5v5h5v-5h5' stroke='%23c8a96e' stroke-width='0.3' fill='none' opacity='0.15'/>
+    </svg>`
   )}`;
 
-  /* ── Helper: genera HTML de una sección ─────────────────── */
+  /* ── Helper: sección ────────────────────────────────────── */
   const sectionHTML = (sec: (typeof cartaPages)[0]["sections"][0]) => {
     const color = COLOR[sec.color ?? "terracota"] ?? COLOR.terracota;
     const items = sec.items.map((item) => `
@@ -53,14 +56,14 @@ async function buildPrintHTML(): Promise<string> {
 
     return `
       <div class="section">
-        <div class="section-header" style="background:${color}">
+        <div class="section-header" style="background-color:${color} !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; color-adjust:exact;">
           <span>${sec.title.toUpperCase()}</span>
         </div>
-        <div class="section-items">${items}</div>
+        ${items}
       </div>`;
   };
 
-  /* ── Generar páginas ────────────────────────────────────── */
+  /* ── Páginas ────────────────────────────────────────────── */
   const pagesHTML = cartaPages.map((page) => {
     const useTwoCols = page.sections.length > 2;
     const half       = Math.ceil(page.sections.length / 2);
@@ -89,7 +92,6 @@ async function buildPrintHTML(): Promise<string> {
         </div>
 
         <div class="divider"></div>
-
         ${contentHTML}
 
         <div class="reserva-box">
@@ -101,44 +103,46 @@ async function buildPrintHTML(): Promise<string> {
       </div>`;
   }).join("\n");
 
-  /* ── HTML completo ──────────────────────────────────────── */
-  return `<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <title>Tinkubar — Carta Completa</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: #2a1f0e;
-      font-family: 'Playfair Display', Georgia, serif;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
+  /* ── CSS con fondos forzados ────────────────────────────── */
+  const css = `
+    *, *::before, *::after {
+      box-sizing: border-box; margin: 0; padding: 0;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
     }
 
-    /* ── Barra superior (solo pantalla) ── */
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+
+    html, body {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+      background: #2a1f0e;
+      font-family: 'Playfair Display', Georgia, serif;
+    }
+
+    /* ── Barra superior ── */
     .print-bar {
       position: fixed; top: 0; left: 0; right: 0;
-      background: rgba(26,18,8,0.97);
+      background: rgba(26,18,8,0.97) !important;
       backdrop-filter: blur(12px);
       border-bottom: 1px solid rgba(200,169,110,0.35);
       padding: 12px 24px;
       display: flex; align-items: center; justify-content: space-between;
       z-index: 9999;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
     }
-    .print-bar-title {
-      font-size: 15px; font-weight: 700;
-      letter-spacing: 5px; color: #d4a017;
-    }
-    .print-bar-hint {
-      font-size: 10px; color: #8a7a5a; margin-top: 3px; letter-spacing: 1px;
-    }
+    .print-bar-title { font-size: 15px; font-weight: 700; letter-spacing: 5px; color: #d4a017; }
+    .print-bar-hint  { font-size: 10px; color: #8a7a5a; margin-top: 3px; letter-spacing: 1px; }
     .btn-print {
-      background: linear-gradient(135deg, #c4622d, #a8501e);
+      background: linear-gradient(135deg, #c4622d, #a8501e) !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
       color: #fff; border: none; cursor: pointer;
       padding: 11px 28px; border-radius: 2px;
       font-family: 'Playfair Display', serif;
@@ -153,9 +157,13 @@ async function buildPrintHTML(): Promise<string> {
       position: relative;
       width: 210mm;
       min-height: 297mm;
-      background-color: #f5edd8;
-      background-image: url("${andeanSVG}");
-      background-repeat: repeat;
+      background-color: #f5edd8 !important;
+      background-image: url("${andeanPattern}") !important;
+      background-repeat: repeat !important;
+      background-size: 40px 40px !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
       padding: 20mm 18mm 16mm;
       margin: 24px auto;
       overflow: hidden;
@@ -163,9 +171,17 @@ async function buildPrintHTML(): Promise<string> {
       flex-direction: column;
     }
 
-    /* Bordes */
-    .border-outer { position: absolute; inset: 9px; border: 1px solid #c8a96e; pointer-events: none; }
-    .border-inner { position: absolute; inset: 13px; border: 0.5px solid #c8a96e; pointer-events: none; }
+    /* Bordes decorativos */
+    .border-outer {
+      position: absolute; inset: 9px;
+      border: 1px solid #c8a96e;
+      pointer-events: none;
+    }
+    .border-inner {
+      position: absolute; inset: 13px;
+      border: 0.5px solid #c8a96e;
+      pointer-events: none;
+    }
 
     /* Header */
     .page-header {
@@ -173,12 +189,14 @@ async function buildPrintHTML(): Promise<string> {
       gap: 16px; margin-bottom: 10px; flex-shrink: 0;
     }
     .logo-oval {
-      width: 58px; height: 58px; border-radius: 50%;
+      width: 60px; height: 60px; border-radius: 50%;
       border: 1.5px solid #c8a96e; overflow: hidden;
-      background: #f5edd8; display: flex;
-      align-items: center; justify-content: center; flex-shrink: 0;
+      background-color: #f5edd8 !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
-    .logo-oval img { width: 50px; height: 50px; object-fit: contain; }
+    .logo-oval img { width: 52px; height: 52px; object-fit: contain; }
     .header-center { text-align: center; }
     .title-main {
       font-size: 28px; font-weight: 700;
@@ -190,7 +208,13 @@ async function buildPrintHTML(): Promise<string> {
     }
 
     /* Divisor */
-    .divider { height: 0.5px; background: #c8a96e; margin: 8px 0 12px; flex-shrink: 0; }
+    .divider {
+      height: 0.5px;
+      background-color: #c8a96e !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      margin: 8px 0 12px; flex-shrink: 0;
+    }
 
     /* Columnas */
     .cols { display: flex; gap: 16px; flex: 1; }
@@ -201,10 +225,13 @@ async function buildPrintHTML(): Promise<string> {
     .section { margin-bottom: 10px; }
     .section-header {
       padding: 6px 14px; margin-bottom: 6px;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
     }
     .section-header span {
       font-size: 12px; font-weight: 700;
-      letter-spacing: 2.5px; color: #fff; text-transform: uppercase;
+      letter-spacing: 2.5px; color: #fff !important; text-transform: uppercase;
     }
 
     /* Items */
@@ -216,7 +243,8 @@ async function buildPrintHTML(): Promise<string> {
     }
     .item-name.bold { font-weight: 700; }
     .item-dots {
-      flex: 1; border-bottom: 0.5px dotted #c8a96e;
+      flex: 1;
+      border-bottom: 0.5px dotted #c8a96e;
       margin: 0 4px 2px; min-width: 10px;
     }
     .item-price {
@@ -231,16 +259,15 @@ async function buildPrintHTML(): Promise<string> {
 
     /* Reserva */
     .reserva-box {
-      border: 0.5px solid #c8a96e; padding: 9px 14px;
-      margin-top: 14px; text-align: center; flex-shrink: 0;
+      border: 0.5px solid #c8a96e;
+      padding: 9px 14px; margin-top: 14px;
+      text-align: center; flex-shrink: 0;
     }
     .reserva-title {
       font-size: 12px; font-weight: 700;
-      letter-spacing: 4px; color: #c4622d;
+      letter-spacing: 4px; color: #c4622d !important;
     }
-    .reserva-text {
-      font-size: 10px; color: #2c1810; margin-top: 4px;
-    }
+    .reserva-text { font-size: 10px; color: #2c1810; margin-top: 4px; }
 
     /* Número de página */
     .page-num {
@@ -250,20 +277,63 @@ async function buildPrintHTML(): Promise<string> {
 
     /* ── PRINT ── */
     @media print {
-      body { background: white; }
+      html, body {
+        background: white !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
       .print-bar, .spacer { display: none !important; }
       .carta-page {
-        margin: 0; width: 210mm; min-height: 297mm;
-        page-break-after: always; break-after: page;
+        margin: 0 !important;
+        width: 210mm !important;
+        min-height: 297mm !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        background-color: #f5edd8 !important;
+        background-image: url("${andeanPattern}") !important;
+        background-repeat: repeat !important;
+        background-size: 40px 40px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+      .section-header {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+      .logo-oval {
+        background-color: #f5edd8 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .divider {
+        background-color: #c8a96e !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
     }
-  </style>
+  `;
+
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tinkubar — Carta Completa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
+  <style>${css}</style>
 </head>
 <body>
   <div class="print-bar">
     <div>
       <div class="print-bar-title">TINKUBAR — CARTA COMPLETA</div>
-      <div class="print-bar-hint">En el diálogo de impresión → Destino: "Guardar como PDF" · Márgenes: Ninguno · Escala: 100%</div>
+      <div class="print-bar-hint">
+        Diálogo de impresión → Destino: "Guardar como PDF" · Márgenes: Ninguno · 
+        ✅ Activar "Gráficos de fondo" / "Background graphics"
+      </div>
     </div>
     <button class="btn-print" onclick="window.print()">⬇ Guardar como PDF</button>
   </div>
@@ -273,7 +343,7 @@ async function buildPrintHTML(): Promise<string> {
 
   <script>
     document.fonts.ready.then(function() {
-      setTimeout(function() { window.print(); }, 1000);
+      setTimeout(function() { window.print(); }, 1200);
     });
   </script>
 </body>
@@ -294,7 +364,6 @@ export default function DownloadPDF() {
       const url  = URL.createObjectURL(blob);
       const win  = window.open(url, "_blank", "width=960,height=860,scrollbars=yes");
       if (!win) {
-        /* Popup bloqueado → descarga el HTML */
         const a    = document.createElement("a");
         a.href     = url;
         a.download = "tinkubar-carta.html";
