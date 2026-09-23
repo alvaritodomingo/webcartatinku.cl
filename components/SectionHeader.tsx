@@ -26,11 +26,11 @@ export default function SectionHeader({
         background: COLOR_MAP[color],
         fontFamily: "var(--font-playfair), serif",
         fontWeight: 700,
-        fontSize: size === "sm" ? "10px" : "12px",
-        padding: size === "sm" ? "4px 12px" : "6px 16px",
-        letterSpacing: "0.12em",
-        boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-        marginBottom: "6px",
+        fontSize: size === "sm" ? "13px" : "15px",
+        padding: size === "sm" ? "6px 14px" : "8px 18px",
+        letterSpacing: "0.14em",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+        marginBottom: "8px",
       }}
     >
       {title}

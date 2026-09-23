@@ -108,7 +108,7 @@ export default function CartaPage({ page, pageRef }: CartaPageProps) {
         position: "relative",
         backgroundColor: "#f5edd8",
         backgroundImage: ANDEAN_PATTERN,
-        padding: "14mm 12mm 10mm",
+        padding: "16mm 14mm 12mm",
         display: "flex",
         flexDirection: "column",
         boxSizing: "border-box",
@@ -154,15 +154,15 @@ export default function CartaPage({ page, pageRef }: CartaPageProps) {
           borderBottom: "0.5px solid #c8a96e",
         }}
       >
-        <TinkuLogo size={60} />
+        <TinkuLogo size={76} />
         <div style={{ textAlign: "center" }}>
           <div
             style={{
               fontFamily: "var(--font-playfair), serif",
-              fontSize: "22px",
+              fontSize: "30px",
               fontWeight: 700,
               color: "#2a2015",
-              letterSpacing: "0.18em",
+              letterSpacing: "0.2em",
               lineHeight: 1,
             }}
           >
@@ -171,11 +171,11 @@ export default function CartaPage({ page, pageRef }: CartaPageProps) {
           <div
             style={{
               fontFamily: "var(--font-cormorant), serif",
-              fontSize: "10px",
+              fontSize: "14px",
               color: "#8a7a5a",
               letterSpacing: "0.25em",
               fontStyle: "italic",
-              marginTop: "2px",
+              marginTop: "3px",
             }}
           >
             Restaurante & Café
@@ -183,17 +183,17 @@ export default function CartaPage({ page, pageRef }: CartaPageProps) {
           <div
             style={{
               fontFamily: "var(--font-lato), sans-serif",
-              fontSize: "7px",
+              fontSize: "9px",
               color: "#b8a080",
               letterSpacing: "0.2em",
-              marginTop: "2px",
+              marginTop: "3px",
               textTransform: "uppercase",
             }}
           >
             tinkubar.cl
           </div>
         </div>
-        <TinkuLogo size={60} />
+        <TinkuLogo size={76} />
       </div>
 
       {/* Línea ornamental bajo header */}
