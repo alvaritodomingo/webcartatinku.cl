@@ -222,52 +222,52 @@ async function buildPrintHTML(): Promise<string> {
     .col { flex: 1; min-width: 0; }
 
     /* Sección */
-    .section { margin-bottom: 10px; }
+    .section { margin-bottom: 12px; }
     .section-header {
-      padding: 6px 14px; margin-bottom: 6px;
+      padding: 8px 16px; margin-bottom: 8px;
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
       color-adjust: exact !important;
     }
     .section-header span {
-      font-size: 12px; font-weight: 700;
+      font-size: 15px; font-weight: 700;
       letter-spacing: 2.5px; color: #fff !important; text-transform: uppercase;
     }
 
     /* Items */
-    .item-wrap { margin-bottom: 4px; }
+    .item-wrap { margin-bottom: 5px; }
     .item-row { display: flex; align-items: flex-end; }
     .item-name {
-      font-size: 12.5px; color: #2c1810; white-space: nowrap;
+      font-size: 14.5px; color: #2c1810; white-space: nowrap;
       font-family: 'Playfair Display', serif;
     }
     .item-name.bold { font-weight: 700; }
     .item-dots {
       flex: 1;
       border-bottom: 0.5px dotted #c8a96e;
-      margin: 0 4px 2px; min-width: 10px;
+      margin: 0 4px 3px; min-width: 10px;
     }
     .item-price {
-      font-size: 12.5px; color: #2c1810; white-space: nowrap;
+      font-size: 14.5px; color: #2c1810; white-space: nowrap;
       font-family: 'Playfair Display', serif;
     }
     .item-desc {
       font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: 10px; font-style: italic;
-      color: #7a6a50; padding-left: 2px; margin-bottom: 1px;
+      font-size: 12px; font-style: italic;
+      color: #7a6a50; padding-left: 2px; margin-bottom: 2px;
     }
 
     /* Reserva */
     .reserva-box {
       border: 0.5px solid #c8a96e;
-      padding: 9px 14px; margin-top: 14px;
+      padding: 10px 16px; margin-top: 16px;
       text-align: center; flex-shrink: 0;
     }
     .reserva-title {
-      font-size: 12px; font-weight: 700;
+      font-size: 13px; font-weight: 700;
       letter-spacing: 4px; color: #c4622d !important;
     }
-    .reserva-text { font-size: 10px; color: #2c1810; margin-top: 4px; }
+    .reserva-text { font-size: 11px; color: #2c1810; margin-top: 4px; }
 
     /* Número de página */
     .page-num {

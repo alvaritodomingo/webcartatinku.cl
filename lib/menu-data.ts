@@ -66,14 +66,14 @@ export const cartaPages: CartaPageData[] = [
     ],
   },
 
-  /* ══ PÁGINA 2: CARGA DESAYUNO + CAFÉ + POSTRES ══════════ */
+  /* ══ PÁGINA 2: CARTA DE DESAYUNO + CAFÉ + POSTRES ═══════ */
   {
     id: "page-2",
     pageNumber: 2,
     reservaText: "Reserva al +56 9 XXXX XXXX · tinkubar.cl",
     sections: [
       {
-        title: "Carga Desayuno",
+        title: "Carta de Desayuno",
         color: "terracota",
         items: [
           { name: "Vaso de Jugo Natural",    desc: "naranja, pomelo o zanahoria",               price: 2900 },
