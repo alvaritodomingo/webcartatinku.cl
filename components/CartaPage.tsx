@@ -10,7 +10,7 @@ interface CartaPageProps {
   pageRef?: React.RefObject<HTMLDivElement | null>;
 }
 
-/* ─── Logo SVG Tinkubar (óvalo con silueta) ─────────────── */
+/* ─── Logo real Tinkubar desde archivo SVG público ──────── */
 function TinkuLogo({ size = 64 }: { size?: number }) {
   return (
     <div
@@ -19,51 +19,28 @@ function TinkuLogo({ size = 64 }: { size?: number }) {
         height: size,
         borderRadius: "50%",
         border: "1.5px solid #c8a96e",
-        background: "rgba(255,255,255,0.25)",
+        background: "rgba(255,255,255,0.15)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         flexShrink: 0,
+        overflow: "hidden",
+        padding: "4px",
       }}
     >
-      <svg
-        viewBox="0 0 80 80"
-        width={size * 0.75}
-        height={size * 0.75}
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {/* Figura izquierda */}
-        <circle cx="26" cy="16" r="6" fill="#3d7a72" />
-        <path d="M18 28 Q26 22 34 28 L36 48 Q26 52 16 48 Z" fill="#3d7a72" opacity="0.85" />
-        <line x1="16" y1="48" x2="13" y2="64" stroke="#3d7a72" strokeWidth="3" strokeLinecap="round" />
-        <line x1="36" y1="48" x2="39" y2="64" stroke="#3d7a72" strokeWidth="3" strokeLinecap="round" />
-        {/* Copa izquierda */}
-        <path d="M34 28 L39 40 L29 40 Z" fill="#b8860b" opacity="0.7" />
-        <line x1="34" y1="40" x2="34" y2="46" stroke="#b8860b" strokeWidth="1.5" />
-        <line x1="30" y1="46" x2="38" y2="46" stroke="#b8860b" strokeWidth="1.5" />
-
-        {/* Figura derecha */}
-        <circle cx="54" cy="16" r="6" fill="#c4622d" />
-        <path d="M46 28 Q54 22 62 28 L64 48 Q54 52 44 48 Z" fill="#c4622d" opacity="0.85" />
-        <line x1="44" y1="48" x2="41" y2="64" stroke="#c4622d" strokeWidth="3" strokeLinecap="round" />
-        <line x1="64" y1="48" x2="67" y2="64" stroke="#c4622d" strokeWidth="3" strokeLinecap="round" />
-        {/* Copa derecha */}
-        <path d="M46 28 L41 40 L51 40 Z" fill="#b8860b" opacity="0.7" />
-        <line x1="46" y1="40" x2="46" y2="46" stroke="#b8860b" strokeWidth="1.5" />
-        <line x1="42" y1="46" x2="50" y2="46" stroke="#b8860b" strokeWidth="1.5" />
-
-        {/* Brindis central */}
-        <circle cx="40" cy="26" r="3" fill="#d4a017" opacity="0.9" />
-        <line x1="40" y1="20" x2="40" y2="17" stroke="#d4a017" strokeWidth="1" opacity="0.8" />
-        <line x1="44" y1="22" x2="47" y2="19" stroke="#d4a017" strokeWidth="1" opacity="0.8" />
-        <line x1="36" y1="22" x2="33" y2="19" stroke="#d4a017" strokeWidth="1" opacity="0.8" />
-
-        {/* Texto TINKU */}
-        <text x="40" y="74" textAnchor="middle" fill="#b8860b" fontSize="7" fontFamily="serif" letterSpacing="2">
-          TINKU
-        </text>
-      </svg>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/logo-tinku.svg"
+        alt="Logo Tinkubar"
+        width={size}
+        height={size}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "contain",
+          filter: "brightness(0.15) sepia(1) hue-rotate(10deg) saturate(3)",
+        }}
+      />
     </div>
   );
 }

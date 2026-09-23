@@ -31,16 +31,22 @@ export default function Home() {
         {/* Logo compacto */}
         <div className="flex items-center gap-3">
           <div
-            className="w-8 h-8 rounded-full flex items-center justify-center"
+            className="w-9 h-9 rounded-full flex items-center justify-center overflow-hidden p-1"
             style={{ border: "1px solid #c8a96e", background: "rgba(255,255,255,0.05)" }}
           >
-            <svg viewBox="0 0 40 40" width="22" height="22" fill="none">
-              <circle cx="13" cy="9" r="4" fill="#3d7a72" />
-              <path d="M8 16 Q13 12 18 16 L19 28 Q13 31 7 28 Z" fill="#3d7a72" opacity="0.85" />
-              <circle cx="27" cy="9" r="4" fill="#c4622d" />
-              <path d="M22 16 Q27 12 32 16 L33 28 Q27 31 21 28 Z" fill="#c4622d" opacity="0.85" />
-              <circle cx="20" cy="14" r="2" fill="#d4a017" opacity="0.9" />
-            </svg>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo-tinku.svg"
+              alt="Tinkubar"
+              width={28}
+              height={28}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                filter: "brightness(0) invert(1) sepia(1) saturate(2) hue-rotate(5deg)",
+              }}
+            />
           </div>
           <div>
             <span
