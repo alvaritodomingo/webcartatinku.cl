@@ -101,6 +101,7 @@ export default function CartaPage({ page, pageRef }: CartaPageProps) {
     <div
       ref={pageRef}
       id={page.id}
+      data-carta-page="true"
       className="carta-page andean-pattern animate-page"
       style={{
         width: "210mm",

@@ -3,76 +3,91 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Download, Loader2, FileText } from "lucide-react";
-
-interface DownloadPDFProps {
-  targetId?: string;
-}
+import { cartaPages } from "@/lib/menu-data";
 
 /* ─── Botón de descarga PDF con html2canvas + jsPDF ─────── */
-export default function DownloadPDF({ targetId = "carta-completa" }: DownloadPDFProps) {
-  const [loading, setLoading] = useState(false);
+export default function DownloadPDF() {
+  const [loading, setLoading]   = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const handleDownload = async () => {
     setLoading(true);
+    setProgress(0);
+
     try {
-      /* Importación dinámica para evitar SSR */
-      const html2canvas = (await import("html2canvas")).default;
-      const jsPDF        = (await import("jspdf")).default;
+      /* Importación dinámica — evita SSR */
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import("html2canvas"),
+        import("jspdf"),
+      ]);
 
-      const container = document.getElementById(targetId);
-      if (!container) {
-        console.error("No se encontró el contenedor:", targetId);
-        setLoading(false);
-        return;
-      }
+      /* Buscar páginas por data-carta-page en el DOM */
+      const pageEls = Array.from(
+        document.querySelectorAll<HTMLElement>("[data-carta-page='true']")
+      );
 
-      /* Obtener todas las páginas */
-      const pages = container.querySelectorAll<HTMLElement>("[data-carta-page]");
-      if (pages.length === 0) {
-        console.error("No se encontraron páginas de carta");
+      /* Fallback: buscar por IDs de las páginas */
+      const elements: HTMLElement[] = pageEls.length > 0
+        ? pageEls
+        : cartaPages
+            .map((p) => document.getElementById(p.id))
+            .filter((el): el is HTMLElement => el !== null);
+
+      if (elements.length === 0) {
+        alert("No se encontraron páginas para generar el PDF. Intenta de nuevo.");
         setLoading(false);
         return;
       }
 
       const pdf = new jsPDF({
         orientation: "portrait",
-        unit: "mm",
-        format: "a4",
+        unit:        "mm",
+        format:      "a4",
+        compress:    true,
       });
 
-      for (let i = 0; i < pages.length; i++) {
-        const page = pages[i];
+      for (let i = 0; i < elements.length; i++) {
+        const el = elements[i];
+        setProgress(Math.round(((i + 1) / elements.length) * 100));
 
-        const canvas = await html2canvas(page, {
-            scale: 2,
-            useCORS: true,
-            allowTaint: false,
-            backgroundColor: "#f5edd8",
-            logging: false,
-            imageTimeout: 0,
-            removeContainer: true,
-            ignoreElements: (el) => {
-              // Ignorar elementos SVG con dimensiones 0
-              if (el instanceof SVGElement) return false;
-              const w = (el as HTMLElement).offsetWidth;
-              const h = (el as HTMLElement).offsetHeight;
-              return w === 0 && h === 0;
-            },
-          });
+        /* Forzar dimensiones explícitas para evitar canvas 0x0 */
+        const w = el.scrollWidth  || el.offsetWidth  || 794;
+        const h = el.scrollHeight || el.offsetHeight || 1123;
 
-        const imgData = canvas.toDataURL("image/jpeg", 0.95);
-        const pdfWidth  = 210;
-        const pdfHeight = 297;
+        const canvas = await html2canvas(el, {
+          scale:           2,
+          useCORS:         true,
+          allowTaint:      false,
+          backgroundColor: "#f5edd8",
+          logging:         false,
+          imageTimeout:    0,
+          width:           w,
+          height:          h,
+          windowWidth:     w,
+          windowHeight:    h,
+          x:               0,
+          y:               0,
+          scrollX:         0,
+          scrollY:         0,
+          ignoreElements:  (node) => {
+            if (node.tagName === "SCRIPT" || node.tagName === "STYLE") return true;
+            const el = node as HTMLElement;
+            return !!(el.offsetWidth === 0 && el.offsetHeight === 0 && !el.querySelector("svg"));
+          },
+        });
 
+        const imgData = canvas.toDataURL("image/jpeg", 0.92);
         if (i > 0) pdf.addPage();
-        pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
+        pdf.addImage(imgData, "JPEG", 0, 0, 210, 297, undefined, "FAST");
       }
 
-      pdf.save("tinkubar-carta.pdf");
+      pdf.save("tinkubar-carta-completa.pdf");
     } catch (err) {
       console.error("Error generando PDF:", err);
+      alert("Hubo un error al generar el PDF. Intenta usar el botón Imprimir.");
     } finally {
       setLoading(false);
+      setProgress(0);
     }
   };
 
@@ -82,45 +97,53 @@ export default function DownloadPDF({ targetId = "carta-completa" }: DownloadPDF
       disabled={loading}
       whileHover={!loading ? { scale: 1.04, boxShadow: "0 12px 40px rgba(196,98,45,0.5)" } : {}}
       whileTap={!loading ? { scale: 0.97 } : {}}
-      className="no-print flex items-center gap-2.5 px-6 py-3 rounded-sm text-white font-[family-name:var(--font-playfair)] text-sm tracking-widest uppercase disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200"
+      className="no-print flex items-center gap-2.5 px-6 py-3 rounded-sm text-white disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200"
       style={{
         background: loading
           ? "linear-gradient(135deg, #8a7a5a, #6a5a3a)"
           : "linear-gradient(135deg, #c4622d, #a8501e)",
-        boxShadow: "0 6px 24px rgba(196,98,45,0.35)",
+        boxShadow:  "0 6px 24px rgba(196,98,45,0.35)",
+        fontFamily: "var(--font-playfair), serif",
+        fontSize:   "12px",
+        letterSpacing: "0.12em",
+        textTransform: "uppercase",
       }}
     >
       {loading ? (
         <>
-          <Loader2 className="w-4 h-4 animate-spin" />
-          Generando PDF…
+          <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
+          <span>{progress > 0 ? `Generando ${progress}%…` : "Preparando…"}</span>
         </>
       ) : (
         <>
-          <Download className="w-4 h-4" />
-          Descargar Carta PDF
+          <Download className="w-4 h-4 flex-shrink-0" />
+          <span>Descargar PDF</span>
         </>
       )}
     </motion.button>
   );
 }
 
-/* ─── Botón secundario de impresión ─────────────────────── */
+/* ─── Botón de impresión ─────────────────────────────────── */
 export function PrintButton() {
   return (
     <motion.button
       onClick={() => window.print()}
       whileHover={{ scale: 1.04 }}
       whileTap={{ scale: 0.97 }}
-      className="no-print flex items-center gap-2.5 px-5 py-3 rounded-sm font-[family-name:var(--font-playfair)] text-sm tracking-widest uppercase transition-all duration-200"
+      className="no-print flex items-center gap-2 px-5 py-3 rounded-sm transition-all duration-200"
       style={{
-        border: "1px solid #c8a96e",
-        color: "#c8a96e",
-        background: "transparent",
+        border:        "1px solid #c8a96e",
+        color:         "#c8a96e",
+        background:    "transparent",
+        fontFamily:    "var(--font-playfair), serif",
+        fontSize:      "12px",
+        letterSpacing: "0.12em",
+        textTransform: "uppercase",
       }}
     >
       <FileText className="w-4 h-4" />
-      Imprimir
+      <span>Imprimir</span>
     </motion.button>
   );
 }

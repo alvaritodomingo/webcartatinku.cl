@@ -67,7 +67,7 @@ export default function Home() {
         {/* Botones acción */}
         <div className="flex items-center gap-3">
           <PrintButton />
-          <DownloadPDF targetId="carta-completa" />
+          <DownloadPDF />
         </div>
       </motion.header>
 
@@ -127,7 +127,6 @@ export default function Home() {
         {cartaPages.map((page, index) => (
           <motion.div
             key={page.id}
-            data-carta-page
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
